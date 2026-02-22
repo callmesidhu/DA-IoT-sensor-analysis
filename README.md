@@ -2,42 +2,6 @@
 
 An end-to-end, professional-grade data analytics, preprocessing, and anomaly detection pipeline for multi-modal IoT sensor datasets. This project ingests raw sensor telemetry, cleans and normalizes the data, detects complex environmental anomalies using machine learning, and compiles an executive dashboard of key performance indicators (KPIs) and operational insights.
 
----
-
-## 🏗️ Analytics Architecture
-
-The following diagram illustrates how the raw telemetry flows through the cleaning and analytics pipeline:
-
-```mermaid
-graph TD
-    %% Dataset Sources
-    subgraph Datasets
-        A1[gas_sensor.csv] -->|Raw Gas Telemetry| B[Data Preprocessing]
-        A2[ultrasonic_sensor.csv] -->|Proximity Metrics| B
-        A3[temp_hum_sensor.csv] -->|Headerless Raw Strings| B
-        A4[earthquake_sensor.csv] -->|3-Axis Vibration Vectors| B
-    end
-
-    %% Pipeline Processing
-    subgraph Analytics Pipeline
-        B -->|Duplicate Removal & Type Casting| C[Cleaned Dataframes]
-        C -->|Statistical Modeling & Distributions| D[Exploratory Data Analysis]
-        C -->|Isolation Forest Model| E[Anomaly Detection]
-        C -->|Euclidean Vector Magnitudes| F[Feature Engineering]
-    end
-
-    %% Dashboard outputs
-    subgraph Output Deliverables
-        D --> G[Executive KPI Dashboard]
-        E --> G
-        F --> G
-        G --> H[Top 5 Operational Insights]
-    end
-
-    style Datasets fill:#f9f9f9,stroke:#333,stroke-width:1px
-    style Analytics Pipeline fill:#eef,stroke:#333,stroke-width:1px
-    style Output Deliverables fill:#efe,stroke:#333,stroke-width:1px
-```
 
 ---
 
@@ -155,4 +119,3 @@ Based on statistical distribution and anomaly detection analysis, we have classi
    ```
    Run all cells to clean the data, generate plots, fit the Isolation Forest model, and print the Executive KPI Dashboard.
 
-*Note: The Jupyter Notebook is fully self-contained and pre-configured for both local Jupyter environments and Google Colab.*
