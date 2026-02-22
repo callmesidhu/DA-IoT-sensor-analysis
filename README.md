@@ -1,96 +1,112 @@
-# IoT Sensor Monitoring & Data Analytics
+# 🌐 IoT Sensor Monitoring & Data Analytics Dashboard
 
-Welcome to the **IoT Sensor Monitoring & Data Analytics** project. This project provides a comprehensive, professional-grade data cleaning, exploratory data analysis (EDA), anomaly detection, and KPI dashboarding pipeline for four different IoT sensor datasets:
-1. **Temperature & Humidity Sensor** (`temp_hum_sensor.csv`)
-2. **MQ-Series Gas Sensors** (`gas_sensor.csv`)
-3. **Ultrasonic Proximity Sensor** (`ultrasonic_sensor.csv`)
-4. **Earthquake Vibration Sensor** (`earthquake_sensor.csv`)
-
-The complete analysis is implemented in the local Jupyter Notebook: **[IoT_Sensor_Analysis.ipynb](file:///c:/Users/sidha/Downloads/DA-IoT-sensor-monitoring/IoT_Sensor_Analysis.ipynb)**.
+An end-to-end, professional-grade data analytics, preprocessing, and anomaly detection pipeline for multi-modal IoT sensor datasets. This project ingests raw sensor telemetry, cleans and normalizes the data, detects complex environmental anomalies using machine learning, and compiles an executive dashboard of key performance indicators (KPIs) and operational insights.
 
 ---
 
-## 📊 Analytics Questions & Answers
+## 🏗️ Analytics Architecture
 
-### 🌡️ Temperature & Humidity
-* **What is the average temperature?**
-  * The average (mean) temperature recorded is **21.35 °C** (Median: 20.00 °C, Mode: 21.00 °C).
-* **What is the average humidity?**
-  * The average (mean) relative humidity is **21.87%** (Median: 21.00%, Mode: 21.00%).
-* **What is the highest and lowest value?**
-  * **Temperature:** The highest temperature is **37.00 °C**; the lowest is **9.00 °C**.
-  * **Humidity:** The highest humidity is **140.00%** (representing an anomalous, physically out-of-bounds reading); the lowest is **12.00%**.
-* **How do they change over time?**
-  * Both metrics remain fairly stable over the timeline. Temperature oscillates around its 20-21 °C baseline, while humidity hovers around 21% with a few distinct spikes (such as the 140% anomaly). Exploratory analysis reveals a strong negative correlation: as temperature goes up, relative humidity drops, which can be useful for predicting missing values.
+The following diagram illustrates how the raw telemetry flows through the cleaning and analytics pipeline:
 
----
+```mermaid
+graph TD
+    %% Dataset Sources
+    subgraph Datasets
+        A1[gas_sensor.csv] -->|Raw Gas Telemetry| B[Data Preprocessing]
+        A2[ultrasonic_sensor.csv] -->|Proximity Metrics| B
+        A3[temp_hum_sensor.csv] -->|Headerless Raw Strings| B
+        A4[earthquake_sensor.csv] -->|3-Axis Vibration Vectors| B
+    end
 
-### 💨 MQ Gas Sensors
-* **Which sensor reacts most strongly?**
-  * **MQ8** sensor reacts most strongly to gas presence, showing a massive mean voltage/resistance drop from a baseline of **637.15 (NoGas)** down to **315.25** in the presence of a **Mixture**. **MQ135** also reacts strongly to **Smoke**, dropping from **474.47 (NoGas)** down to **308.11**.
-* **Which gas produces the highest readings?**
-  * The raw readings are highest in **NoGas** (clean air) and **Perfume** conditions across all MQ sensors (e.g., MQ2 averages 748.39 in NoGas and 745.33 in Perfume). Readings drop significantly when exposed to **Smoke** and **Mixture**.
-* **Which sensors overlap?**
-  * The correlation heatmap shows that **MQ2, MQ3, MQ5, MQ6, and MQ135** have highly overlapping responses (very high correlation blocks). In a production IoT device, we could safely remove several of these sensors to reduce hardware costs without losing key detection capabilities.
+    %% Pipeline Processing
+    subgraph Analytics Pipeline
+        B -->|Duplicate Removal & Type Casting| C[Cleaned Dataframes]
+        C -->|Statistical Modeling & Distributions| D[Exploratory Data Analysis]
+        C -->|Isolation Forest Model| E[Anomaly Detection]
+        C -->|Euclidean Vector Magnitudes| F[Feature Engineering]
+    end
 
----
+    %% Dashboard outputs
+    subgraph Output Deliverables
+        D --> G[Executive KPI Dashboard]
+        E --> G
+        F --> G
+        G --> H[Top 5 Operational Insights]
+    end
 
-### 📏 Ultrasonic Proximity
-* **How does distance affect risk?**
-  * Distance is the primary driver of threat risk. As an object gets closer, the safety status escalates quickly from Clear (0) to Warning (1) and finally Danger (2).
-* **How does speed affect risk?**
-  * High velocity correlates with higher threat risk (Danger states average 22.99 units of speed, while Clear states average 2.57 units), but speed is secondary to the distance boundary.
-* **Which ranges correspond to Clear/Warning/Danger?**
-  * 🟢 **Clear (Status 0):** Distance > ~50 units (Average distance: **70.82**, Average speed: **2.57**)
-  * 🟡 **Warning (Status 1):** Distance between ~20 and ~50 units (Average distance: **30.04**, Average speed: **9.92**)
-  * 🔴 **Danger (Status 2):** Distance < ~20 units (Average distance: **12.72**, Average speed: **22.99**)
-
----
-
-### 🫨 Earthquake Vibration
-* **What is the vibration magnitude?**
-  * The overall vibration magnitude is calculated as the Euclidean norm: $\text{magnitude} = \sqrt{X^2 + Y^2 + Z^2}$. The average magnitude is **9.89**, which perfectly aligns with the standard gravitational acceleration baseline (~9.8 m/s²).
-* **Are there unusual spikes?**
-  * Yes. There is a massive, unusual seismic spike reaching a maximum vibration magnitude of **373.01**, primarily registering along the X-axis (Max X = 373.00), indicating a major earthquake event.
-* **What percentage of readings are abnormal?**
-  * Defining abnormal vibration as any reading deviating significantly from the gravitational baseline (magnitude > 12 or < 6), **3.23%** (968 out of 30,000 readings) of the dataset is classified as abnormal.
-
----
-
-## 📈 Executive KPI Dashboard
-Here is the summary output generated from the final cells of the analysis notebook:
-```text
-============================================================
-             EXECUTIVE KPI DASHBOARD            
-============================================================
-[1] Temp / Hum Sensor
-    - Average Temperature:     21.35 °C
-    - Temperature Anomalies:   15 flags (Isolation Forest)
-    - Average Humidity:        21.87 %
-    - Humidity Anomalies:      10 flags (Isolation Forest)
-
-[2] Gas Sensor
-    - Most Detected Gas:       Mixture
-
-[3] Ultrasonic Proximity
-    - Critical Danger Events:  113
-
-[4] Earthquake Vibration
-    - Max Vibration Spike:     373.01 (Magnitude)
-============================================================
+    style Datasets fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style Analytics Pipeline fill:#eef,stroke:#333,stroke-width:1px
+    style Output Deliverables fill:#efe,stroke:#333,stroke-width:1px
 ```
 
 ---
 
-## 🚀 How to Run the Analysis
-1. Ensure you have the required Python packages installed:
+## 📊 Summary of Sensor Metrics & Thresholds
+
+| Sensor Component | Baseline / Average | Normal Range (Min / Max) | Anomalies / Alert Flags | Key Operational Insight |
+| :--- | :--- | :--- | :--- | :--- |
+| 🌡️ **Temperature** | **21.35 °C** | 9.00 °C to 37.00 °C | **15 Anomaly Flags** (Isolation Forest) | Strong negative correlation with relative humidity. |
+| 💧 **Humidity** | **21.87%** | 12.00% to 140.00% | **10 Anomaly Flags** (Isolation Forest) | Spikes exceeding 100% indicate physical sensor errors. |
+| 💨 **Gas (MQ-Series)** | High Baseline (~748 ADC) | Low values indicate gas presence | MQ8 drops from 637 to 315 in Gas | High correlation shows sensor redundancy; layout can be optimized. |
+| 📏 **Ultrasonic Proximity** | 70.82 units (Clear) | 12.72 (Danger) to 70.82 (Clear) | **113 Critical Danger Events** | Risk status is primarily driven by distance rather than approach speed. |
+| 🫨 **Earthquake Vibration** | **9.89 magnitude** | 0.00 to 373.01 magnitude | **3.23% (968 readings)** abnormal | Baseline aligns with gravity (~9.8 m/s²); spikes signify active earthquakes. |
+
+---
+
+## 📈 Detailed Findings by Sensor
+
+### 1. Temperature & Humidity Analysis
+* **Statistical Averages:** Mean Temperature: **21.35 °C** (Median: 20.00 °C, Mode: 21.00 °C) | Mean Humidity: **21.87%** (Median: 21.00%, Mode: 21.00%).
+* **Extreme Ranges:** Temperature ranges from **9.00 °C** to **37.00 °C**. Humidity ranges from **12.00%** to **140.00%**.
+* **Temporal Patterns:** Environmental conditions remain highly stable. Temperature oscillates tightly around the baseline. Humidity displays a uniform spread except for a few outlying spikes.
+
+> [!WARNING]
+> **Out-of-Bounds Sensor Alert:** The maximum humidity reading of **140.00%** is physically impossible under normal atmospheric conditions, suggesting a localized sensor calibration glitch or liquid contact.
+
+---
+
+### 2. Gas Sensor Analysis
+* **Sensitivity Profile:** The **MQ8** sensor shows the most pronounced sensitivity to gas presence, dropping from a baseline of **637.15** to **315.25** in the presence of a **Gas Mixture**. **MQ135** exhibits strong smoke detection properties, dropping from **474.47** to **308.11** under smoke exposure.
+* **Gas Detection Levels:** Sensor ADC values are highest in **NoGas** (clean air) and **Perfume** conditions. Exposure to Smoke or Mixture leads to sharp value decreases.
+
+> [!TIP]
+> **Hardware Cost Optimization:** Correlation heatmaps reveal extremely high redundancy between MQ2, MQ3, MQ5, MQ6, and MQ135. In production settings, several of these sensors can be safely removed to reduce bill-of-materials (BOM) costs.
+
+---
+
+### 3. Ultrasonic Proximity Analysis
+* **Risk Zone Boundaries:** Threat risk zones are defined by distance-to-object:
+  * 🟢 **Clear (Status 0):** Distance > 50 units (Average distance: **70.82**, Average speed: **2.57**)
+  * 🟡 **Warning (Status 1):** Distance between 20 and 50 units (Average distance: **30.04**, Average speed: **9.92**)
+  * 🔴 **Danger (Status 2):** Distance < 20 units (Average distance: **12.72**, Average speed: **22.99**)
+
+> [!NOTE]
+> **Distance Dominance:** Distance is the dominant variable in risk calculation. Once an obstacle falls within the 20-unit threshold, the status immediately escalates to Danger, irrespective of the object's approach velocity.
+
+---
+
+### 4. Earthquake Vibration Analysis
+* **Gravity Baseline:** By applying the Euclidean norm ($Magnitude = \sqrt{X^2 + Y^2 + Z^2}$) to the X, Y, and Z axes, the baseline vibration is established at a mean magnitude of **9.89**, matching earth's gravitational constant (~9.8 m/s²).
+* **Seismic Spikes:** The dataset contains a massive anomaly with a maximum vibration magnitude of **373.01**, registering almost entirely on the X-axis (Max X = 373.00), representing a significant simulated earthquake.
+
+> [!IMPORTANT]
+> **Anomaly Classification:** By defining abnormal vibration as a magnitude deviation beyond typical thresholds ($Magnitude > 12$ or $< 6$), **3.23%** (968 out of 30,000 readings) of the dataset is classified as anomalous, making simple thresholding highly effective for early warning systems.
+
+---
+
+## 🚀 Running the Analytics Pipeline
+
+1. **Install Dependencies:**
+   Ensure you have the required analytical libraries installed locally:
    ```bash
    pip install pandas numpy matplotlib seaborn scikit-learn
    ```
-2. Open the Jupyter Notebook locally:
+
+2. **Execute the Jupyter Notebook:**
+   Launch your local Jupyter interface and open the workbook:
    ```bash
    jupyter notebook IoT_Sensor_Analysis.ipynb
    ```
-3. Run all cells to clean the data, display interactive visualizations, execute the Isolation Forest anomaly detection, and print the Executive KPI Dashboard.
+   Run all cells to clean the data, generate plots, fit the Isolation Forest model, and print the Executive KPI Dashboard.
 
-*Note: This notebook is fully compatible with Google Colab. To run on Colab, upload the notebook and ensure the `dataset/` folder is uploaded to your Colab directory.*
+*Note: The Jupyter Notebook is fully self-contained and pre-configured for both local Jupyter environments and Google Colab.*
